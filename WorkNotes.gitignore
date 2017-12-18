@@ -1,4 +1,4 @@
-WorkNotes/.settings
 WorkNotes/.classpath
 WorkNotes/.project
-WorkNotes/bin/
+WorkNotes/bin/*
+WorkNotes/.settings/*
