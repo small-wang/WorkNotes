@@ -1,4 +1,5 @@
 WorkNotes/.classpath
 WorkNotes/.project
-WorkNotes/bin/
+WorkNotes/bin/WorkNotes$ButtonListerer.class
+WorkNotes/bin/WorkNotes.class
 WorkNotes/.settings/

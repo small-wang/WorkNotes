@@ -23,7 +23,7 @@ public class WorkNotes {
 	
 	private static final String IMAGE_NAME = "icon.PNG";
 	
-	private static final String SAVE_SUCCESSFULLY_TIPS = "±£´æ³É¹¦";
+	private static final String SAVE_SUCCESSFULLY_TIPS = "Save Success!";
 
 	private String recordLocation;
 
