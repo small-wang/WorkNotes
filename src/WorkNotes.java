@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FileDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
@@ -20,9 +21,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class WorkNotes {
 
 	private static final String BUTTON_SAVE_COMMAND = "Save";
-	
+
+	private static final String BUTTON_SAVEAS_COMMAND = "SaveAs";
+
 	private static final String IMAGE_NAME = "icon.PNG";
-	
+
 	private static final String SAVE_SUCCESSFULLY_TIPS = "Save Success!";
 
 	private String recordLocation;
@@ -33,9 +36,13 @@ public class WorkNotes {
 
 	private JButton saveButton;
 
+	private JButton saveAsButton;
+
 	private JTextArea textArea;
 
 	private JScrollPane scrollPane;
+
+	private FileDialog fileDialog;
 
 	private WorkNotes() {
 		initLocation();
@@ -43,6 +50,7 @@ public class WorkNotes {
 		initTextArea();
 		initScrollPane();
 		initFrame();
+		initFileDialog();
 	}
 
 	private void initLocation() {
@@ -53,7 +61,11 @@ public class WorkNotes {
 	private void initButton() {
 		this.saveButton = new JButton(WorkNotes.BUTTON_SAVE_COMMAND);
 		this.saveButton.setBackground(new Color(220, 220, 220));
-		this.saveButton.addActionListener(new ButtonListerer());
+		this.saveButton.addActionListener(new SaveButtonListener());
+
+		this.saveAsButton = new JButton(WorkNotes.BUTTON_SAVEAS_COMMAND);
+		this.saveAsButton.setBackground(new Color(220, 220, 220));
+		this.saveAsButton.addActionListener(new SaveAsButtonListerner());
 	}
 
 	private void initTextArea() {
@@ -66,20 +78,29 @@ public class WorkNotes {
 		this.scrollPane = new JScrollPane(this.textArea);
 	}
 
+	private void initFileDialog() {
+		this.fileDialog = new FileDialog(this.frame, "SaveAs", FileDialog.SAVE);
+	}
+
 	private void initFrame() {
 		this.frame = new JFrame(this.getClass().getName());
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.frame.getContentPane().setLayout(new BorderLayout());
-		this.frame.add("South", this.saveButton);
-		this.frame.add("North", this.scrollPane);
+		this.frame.add("North", this.saveButton);
+		this.frame.add("South", this.saveAsButton);
+		this.frame.add("Center", this.scrollPane);
 		this.frame.setSize(300, 380);
 		this.frame.setResizable(false);
 		this.frame.setIconImage(new ImageIcon(this.imageLocation + IMAGE_NAME).getImage());
 	}
 
-	private void show() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+	private void showFrame() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
 			UnsupportedLookAndFeelException {
 		this.frame.setVisible(true);
+	}
+
+	private void showSuccessTips() {
+		JOptionPane.showMessageDialog(new JFrame(), SAVE_SUCCESSFULLY_TIPS);
 	}
 
 	private String genFileName() {
@@ -101,41 +122,90 @@ public class WorkNotes {
 		return file;
 	}
 
-	class ButtonListerer implements ActionListener {
+	private void writeFile(String file, String text) {
+		File fileObj = genFile(file);
+		BufferedWriter bufferWriter = null;
+		FileWriter fileWriter = null;
+		try {
+			fileWriter = new FileWriter(fileObj);
+			bufferWriter = new BufferedWriter(fileWriter);
+			bufferWriter.append(text);
+			bufferWriter.flush();
+			showSuccessTips();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} finally {
+			try {
+				if (bufferWriter != null) {
+					bufferWriter.close();
+				}
+				if (fileWriter != null) {
+					fileWriter.close();
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+
+	class SaveAsButtonListerner implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (WorkNotes.BUTTON_SAVE_COMMAND.equals(e.getActionCommand())) {
-				File file = genFile(recordLocation + genFileName());
-				BufferedWriter bufferWriter = null;
-				FileWriter fileWriter = null;
-				try {
-					fileWriter = new FileWriter(file);
-					bufferWriter = new BufferedWriter(fileWriter);
-					bufferWriter.append(textArea.getText());
-					bufferWriter.flush();
-					JOptionPane.showMessageDialog(new JFrame(), SAVE_SUCCESSFULLY_TIPS);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				} finally {
-					try {
-						if (bufferWriter != null) {
-							bufferWriter.close();
-						}
-						if (fileWriter != null) {
-							fileWriter.close();
-						}
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
+			if (WorkNotes.BUTTON_SAVEAS_COMMAND.equals(e.getActionCommand())) {
+				getFileDialog().setVisible(true);
+				if (getFileDialog().getFile() != null) {
+					writeFile(getFileDialog().getDirectory() + getFileDialog().getFile(), getTextArea().getText());
 				}
 			}
 		}
 	}
 
+	class SaveButtonListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (WorkNotes.BUTTON_SAVE_COMMAND.equals(e.getActionCommand())) {
+				writeFile(getRecordLocation() + genFileName(), getTextArea().getText());
+			}
+		}
+	}
+
+	public String getRecordLocation() {
+		return recordLocation;
+	}
+
+	public String getImageLocation() {
+		return imageLocation;
+	}
+
+	public JFrame getFrame() {
+		return frame;
+	}
+
+	public JButton getSaveButton() {
+		return saveButton;
+	}
+
+	public JButton getSaveAsButton() {
+		return saveAsButton;
+	}
+
+	public JTextArea getTextArea() {
+		return textArea;
+	}
+
+	public JScrollPane getScrollPane() {
+		return scrollPane;
+	}
+
+	public FileDialog getFileDialog() {
+		return fileDialog;
+	}
+
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, UnsupportedLookAndFeelException {
-		WorkNotes wr = new WorkNotes();
-		wr.show();
+		WorkNotes workNotes = new WorkNotes();
+		workNotes.showFrame();
 	}
 }
